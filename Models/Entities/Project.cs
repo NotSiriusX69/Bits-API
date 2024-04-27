@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Bits_API.Models
+namespace Bits_API.Models.Entities
 {
     public class Project
     {

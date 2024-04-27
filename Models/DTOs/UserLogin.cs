@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Bits_API.Models
+namespace Bits_API.Models.DTOs
 {
     // DTO : Data Transfer Object
     public class UserLogin

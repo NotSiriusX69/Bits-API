@@ -13,6 +13,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization();
 builder.Services.AddDistributedMemoryCache();
 
+// Register Services
+builder.Services.AddScoped<UsersService>();
+builder.Services.AddScoped<AdminService>();
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromSeconds(10);

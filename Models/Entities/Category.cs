@@ -1,4 +1,4 @@
-﻿namespace Bits_API.Models
+﻿namespace Bits_API.Models.Entities
 {
     public class Category
     {

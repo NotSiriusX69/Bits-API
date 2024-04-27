@@ -1,4 +1,4 @@
-﻿namespace Bits_API.Models
+﻿namespace Bits_API.Models.Entities
 {
     public class User
     {
@@ -11,7 +11,8 @@
 
         public List<Project>? projects { get; set; }
 
-        public User() {
+        public User()
+        {
             createdAt = DateTime.Now.ToString();
         }
 

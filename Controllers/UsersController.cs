@@ -1,39 +1,31 @@
-﻿using Bits_API.Models;
+﻿using Bits_API.Models.DTOs;
+using Bits_API.Models.Entities;
 using Bits_API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bits_API.Controllers
 {
-    [Route("bits")]
+
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private const string SessionName = "_Name";
 
-        private readonly BitsContext _bitsContext;
-        public UsersController(BitsContext bitsContext)
+        private readonly UsersService _usersService;
+        public UsersController(UsersService usersService)
         {
-            _bitsContext = bitsContext;
+            _usersService = usersService;
         }
 
-        [HttpPost("register")]
+        [HttpPost("/register")]
         public IActionResult CreateUser([FromBody] User user)
         {
             try
             {
+                // Check if model is valid
                 if (ModelState.IsValid)
                 {
-                    // Check If email already exists
-                    bool isEmailExist = _bitsContext.user.Any(u => u.email.Equals(user.email));
-
-                    if (isEmailExist)
-                    {
-                        return Unauthorized("Email already exists");
-                    }
-
-                    _bitsContext.user.Add(user);
-                    _bitsContext.SaveChanges();
+                    var User = _usersService.CreateNewUser(user);
                     return Ok("User Created Succesfully");
                 }
                 return BadRequest("Invalid User Data");
@@ -44,20 +36,67 @@ namespace Bits_API.Controllers
             }
         }
 
-        [HttpPost("login")]
+        [HttpPost("/login")]
         public IActionResult Login([FromBody] UserLogin userLogin)
         {
-            // retrieve user
-            var user = _bitsContext.user.SingleOrDefault( u => u.email.Equals(userLogin.email) && u.password.Equals(userLogin.password));
-
-            if (user == null) 
+            try
             {
-                return Unauthorized("Invalid email or password");
+                if (ModelState.IsValid) {
+
+                    // Retrieve user
+                    var User = _usersService.GetUserByEmailPassword(userLogin.email, userLogin.password);
+
+                    if (User == null)
+                    {
+                        return Unauthorized("Invalid email or password");
+                    }
+                    else
+                    {
+                        // If admin 
+                        if (User.isAdmin)
+                        {
+                            return Ok("Logged In succesfully admin");
+                        }
+                        else
+                        {  
+                            return Ok("Logged In succesfully");
+                        }
+
+                    }
+                }
+                return BadRequest("Invalid User Data");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"error: {ex.Message}");
             }
 
-            HttpContext.Session.SetString(SessionName, user.userName);
+        }
 
-            return Ok("Good");
+        [HttpGet("/get-user-info")]
+        public IActionResult GetUserInfo([FromBody] int id) {
+
+            try { 
+
+                if(ModelState.IsValid)
+                {
+                    var user = _usersService.GetUserById(id);
+
+                    if(user == null)
+                    {
+                        return NotFound("User Not found");
+                    }
+
+                    // return user if found
+
+                    return Ok(user);
+                }
+                return BadRequest("Invalid Data");
+
+            } catch (Exception ex)
+            {
+                return StatusCode(500, $"error: {ex.Message}");
+            }
         }
 
     }
