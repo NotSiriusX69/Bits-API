@@ -2,9 +2,9 @@
 
 namespace Bits_API.Models.Entities
 {
-    public class Task
+    public class Bug
     {
-        public int taskId { get; set; }
+        public int bugId { get; set; }
         public string name { get; set; }
         public string? description { get; set; }
         public string? priority { get; set; }
@@ -18,9 +18,10 @@ namespace Bits_API.Models.Entities
         public int statusId { get; set; }
         public Status status { get; set; }
 
-        public Task()
+        public Bug()
         {
             createdAt = DateTime.Now.ToString();
         }
+
     }
 }

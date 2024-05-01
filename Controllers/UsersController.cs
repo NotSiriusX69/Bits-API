@@ -11,8 +11,8 @@ namespace Bits_API.Controllers
     public class UsersController : ControllerBase
     {
 
-        private readonly UsersService _usersService;
-        public UsersController(UsersService usersService)
+        private readonly UserService _usersService;
+        public UsersController(UserService usersService)
         {
             _usersService = usersService;
         }
@@ -78,9 +78,8 @@ namespace Bits_API.Controllers
 
             try { 
 
-                if(ModelState.IsValid)
-                {
-                    var user = _usersService.GetUserById(id);
+
+                  var user = _usersService.GetUserById(id);
 
                     if(user == null)
                     {
@@ -90,14 +89,14 @@ namespace Bits_API.Controllers
                     // return user if found
 
                     return Ok(user);
-                }
-                return BadRequest("Invalid Data");
+             
 
             } catch (Exception ex)
             {
                 return StatusCode(500, $"error: {ex.Message}");
             }
         }
+
 
     }
 }

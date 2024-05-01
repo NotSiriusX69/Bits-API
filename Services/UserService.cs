@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bits_API.Services
 {
-    public class UsersService
+    public class UserService
     {
         private readonly BitsContext _bitsContext;
 
-        public UsersService(BitsContext bitsContext)
+        public UserService(BitsContext bitsContext)
         {
             _bitsContext = bitsContext;
         }
@@ -31,6 +31,7 @@ namespace Bits_API.Services
 
         }
 
+        // Get user by email and password
         public User GetUserByEmailPassword(string email, string password)
         {
             var user = _bitsContext.user.SingleOrDefault(u => u.email.Equals(email) && u.password.Equals(password));
@@ -38,11 +39,21 @@ namespace Bits_API.Services
             return user;
         }
 
+        // Get user by ID
         public User GetUserById(int id)
         {
             var user = _bitsContext.user.SingleOrDefault(u => u.userId == id);
             
             return user;
         }
+
+        // Get user Projects
+        public IEnumerable<Project> GetUserProjects(int id) {
+
+            var projects = _bitsContext.project.Where(p => p.userId == id);
+
+            return projects;
+        }
+
     }
 }

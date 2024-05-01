@@ -20,5 +20,11 @@ namespace Bits_API.Models.Entities
         public User user { get; set; }
 
         public List<Task>? tasks { get; set; }
+        public List<Bug>? bugs { get; set; }
+
+        public Project()
+        {
+            createdAt = DateTime.Now.ToString();
+        }
     }
 }

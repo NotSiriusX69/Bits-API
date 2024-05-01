@@ -14,7 +14,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddDistributedMemoryCache();
 
 // Register Services
-builder.Services.AddScoped<UsersService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AdminService>();
 
 builder.Services.AddSession(options =>
