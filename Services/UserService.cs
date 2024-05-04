@@ -13,7 +13,6 @@ namespace Bits_API.Services
             _bitsContext = bitsContext;
         }
 
-
         // Create New User in the database
         public User CreateNewUser(User newUser)
         {

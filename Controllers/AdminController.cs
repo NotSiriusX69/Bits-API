@@ -20,6 +20,7 @@ namespace Bits_API.Controllers
             _usersService = usersService;
         }
 
+        // GET Application Info
         [HttpGet("get-app-info")]
         public IActionResult Get()
         {
@@ -35,6 +36,7 @@ namespace Bits_API.Controllers
 
         }
 
+        // GET all projects for a specific user 
         [HttpGet("get-user-projects")]
         public IActionResult GetUserProjects([FromBody] int id) {
 
@@ -55,6 +57,49 @@ namespace Bits_API.Controllers
                 return StatusCode(500, $"error: {ex.Message}");
             }
 
+        }
+        
+        // GET all users
+        [HttpGet("get-users")]
+        public IActionResult GetUsers() 
+        {
+
+            try
+            {
+                var users = _adminService.GetUsers();
+
+                if(users == null)
+                {
+                    return BadRequest("No Users in database");
+                }
+
+                return Ok(users);
+
+            }catch (Exception ex) 
+            {
+                return StatusCode(500, $"error: {ex.Message}");
+            }
+        }
+
+        // GET all users that match the searching string
+        [HttpGet("get-searched-users")]
+        public IActionResult GetSearchedUsers([FromQuery] string searchValue)
+        {
+            try
+            {
+                var users = _adminService.GetSearchedUsers(searchValue);
+
+                if (users == null)
+                {
+                    return NotFound("No Users has been found");
+                }
+
+                return Ok(users);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, $"error: {ex.Message}");
+            }
         }
 
     }

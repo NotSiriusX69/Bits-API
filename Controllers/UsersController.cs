@@ -3,6 +3,7 @@ using Bits_API.Models.Entities;
 using Bits_API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Bits_API.Controllers
 {
@@ -12,11 +13,14 @@ namespace Bits_API.Controllers
     {
 
         private readonly UserService _usersService;
+
+
         public UsersController(UserService usersService)
         {
             _usersService = usersService;
         }
 
+        // POST register user
         [HttpPost("/register")]
         public IActionResult CreateUser([FromBody] User user)
         {
@@ -36,35 +40,51 @@ namespace Bits_API.Controllers
             }
         }
 
+        // POST login user
         [HttpPost("/login")]
         public IActionResult Login([FromBody] UserLogin userLogin)
         {
             try
             {
-                if (ModelState.IsValid) {
 
-                    // Retrieve user
-                    var User = _usersService.GetUserByEmailPassword(userLogin.email, userLogin.password);
+                // Retrieve user
+                var User = _usersService.GetUserByEmailPassword(userLogin.email, userLogin.password);
 
-                    if (User == null)
+                // Set Cookie
+                var cookieOptions = new CookieOptions
+                {
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    MaxAge = TimeSpan.FromSeconds(30)
+
+                };
+
+                // Send the Cookie with user_id
+                Response.Cookies.Append("user_id", User.userId.ToString(), cookieOptions);
+
+                if (User == null)
+                {
+                    return Unauthorized("Invalid email or password");
+                }
+                else
+                {
+
+                    // If admin 
+                    if (User.isAdmin)
                     {
-                        return Unauthorized("Invalid email or password");
+                        HttpContext.Session.SetString("user_id", User.userId.ToString());
+                        HttpContext.Session.SetString("isAdmin", User.isAdmin.ToString());
+                        return Ok(User.isAdmin);
                     }
                     else
                     {
-                        // If admin 
-                        if (User.isAdmin)
-                        {
-                            return Ok("Logged In succesfully admin");
-                        }
-                        else
-                        {  
-                            return Ok("Logged In succesfully");
-                        }
-
+                        HttpContext.Session.SetString("user_id", User.userId.ToString());
+                        HttpContext.Session.SetString("isAdmin", User.isAdmin.ToString());
+                        return Ok(User.isAdmin);
                     }
+
                 }
-                return BadRequest("Invalid User Data");
+
             }
             catch (Exception ex)
             {
@@ -73,25 +93,59 @@ namespace Bits_API.Controllers
 
         }
 
+        // GET all user info by id
         [HttpGet("/get-user-info")]
-        public IActionResult GetUserInfo([FromBody] int id) {
+        public IActionResult GetUserInfo([FromBody] int id)
+        {
 
-            try { 
+            try
+            {
+
+                var user = _usersService.GetUserById(id);
+
+                if (user == null)
+                {
+                    return NotFound("User Not found");
+                }
+
+                // return user if found
+
+                return Ok(user);
 
 
-                  var user = _usersService.GetUserById(id);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"error: {ex.Message}");
+            }
+        }
 
-                    if(user == null)
-                    {
-                        return NotFound("User Not found");
-                    }
+        [HttpPost("/get-user-data")]
+        public IActionResult GetUserData([FromBody] int id)
+        {
 
-                    // return user if found
+            try
+            {
+                Console.WriteLine("res" + id);
 
-                    return Ok(user);
-             
+                var user = _usersService.GetUserById(id);
 
-            } catch (Exception ex)
+                UserDataSimplified userDataSimplified = new UserDataSimplified
+                {
+                    userId = user.userId,
+                    isAdmin = user.isAdmin
+                };
+
+                if (user == null)
+                {
+                    return NotFound("User Not found");
+                }
+
+                // return user if found
+                return Ok(userDataSimplified);
+
+            }
+            catch (Exception ex)
             {
                 return StatusCode(500, $"error: {ex.Message}");
             }
