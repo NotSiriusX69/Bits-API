@@ -7,7 +7,7 @@ namespace Bits_API.Services
     {
         private readonly BitsContext _bitsContext;
 
-        public AdminService(BitsContext bitsContext) 
+        public AdminService(BitsContext bitsContext)
         {
             _bitsContext = bitsContext;
         }
@@ -17,9 +17,9 @@ namespace Bits_API.Services
         {
             // Create new object to fill and return
             ApplicationInfo appInfo = new ApplicationInfo();
-            
+
             // Get Numbers
-            int usersCount = ( from users in _bitsContext.user select users.userId ).Count();
+            int usersCount = (from users in _bitsContext.user select users.userId).Count();
             int projectsCount = (from projects in _bitsContext.project select projects.projectId).Count();
             int tasksCount = (from tasks in _bitsContext.task select tasks.projectId).Count();
             int adminsCount = (from users in _bitsContext.user where users.isAdmin == true select users.userId).Count();
@@ -40,23 +40,21 @@ namespace Bits_API.Services
             // List to store all retrieved users in database
             var retrieved_users = new List<UserData>();
 
-            foreach (var user in _bitsContext.user)
+            foreach (var user in _bitsContext.user.Include(u => u.projects))
             {
-                // To store user's data
-                UserData user_data = new UserData
-                {
-                    // Assign all values
-                    userId = user.userId,
-                    userName = user.userName,
-                    password = user.password,
-                    email = user.email,
-                    createdAt = user.createdAt,
-                    isAdmin = user.isAdmin,
-                    projectsNumber = user.projects.Count
-                };
+
+                UserData userData = new UserData();
+
+                userData.userId = user.userId;
+                userData.userName = user.userName;
+                userData.password = user.password;
+                userData.email = user.email;
+                userData.createdAt = user.createdAt;
+                userData.isAdmin = user.isAdmin;
+                userData.projectsNumber = user.projects?.Count ?? 0;
 
                 // Append user to the list
-                retrieved_users.Add(user_data);
+                retrieved_users.Add(userData);
             }
 
             return retrieved_users;
@@ -87,6 +85,12 @@ namespace Bits_API.Services
 
             return searchedUsers;
 
+        }
+
+        // Update Database
+        public void SubmitUserChanges()
+        {
+            _bitsContext.SaveChanges();
         }
     }
 }

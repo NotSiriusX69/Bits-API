@@ -27,6 +27,8 @@ namespace Bits_API.Controllers
             try
             {
                 ApplicationInfo appInfo = _adminService.GetApplicationInfo();
+                Console.WriteLine(appInfo);
+
                 return Ok(appInfo);
             }
             catch (Exception ex)
@@ -38,13 +40,14 @@ namespace Bits_API.Controllers
 
         // GET all projects for a specific user 
         [HttpGet("get-user-projects")]
-        public IActionResult GetUserProjects([FromBody] int id) {
+        public IActionResult GetUserProjects([FromBody] int id)
+        {
 
             try
             {
                 var projects = _usersService.GetUserProjects(id);
 
-                if(projects == null)
+                if (projects == null)
                 {
                     return BadRequest("Projects are Null");
                 }
@@ -58,24 +61,25 @@ namespace Bits_API.Controllers
             }
 
         }
-        
+
         // GET all users
         [HttpGet("get-users")]
-        public IActionResult GetUsers() 
+        public IActionResult GetUsers()
         {
 
             try
             {
                 var users = _adminService.GetUsers();
 
-                if(users == null)
+                if (users == null)
                 {
                     return BadRequest("No Users in database");
                 }
 
                 return Ok(users);
 
-            }catch (Exception ex) 
+            }
+            catch (Exception ex)
             {
                 return StatusCode(500, $"error: {ex.Message}");
             }
@@ -96,10 +100,99 @@ namespace Bits_API.Controllers
 
                 return Ok(users);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(500, $"error: {ex.Message}");
             }
+        }
+
+        // GET all user info by id
+        [HttpGet("user-info/{id}")]
+        public IActionResult GetUserInfo(int id)
+        {
+
+            try
+            {
+
+                var user = _usersService.GetUserById(id);
+
+                if (user == null)
+                {
+                    return NotFound("User Not found");
+                }
+
+                // return user if found
+
+                return Ok(user);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"error: {ex.Message}");
+            }
+        }
+
+        // GET all user info by id
+        [HttpGet("user-info-projects/{id}")]
+        public IActionResult GetUserProjectsInfo(int id)
+        {
+
+            try
+            {
+
+                var projects = _usersService.GetUserProjects(id);
+
+                if (projects == null || !projects.Any())
+                {
+                    return NotFound("No Projects were found");
+                }
+
+                // return projects if found
+
+                return Ok(projects);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"error: {ex.Message}");
+            }
+        }
+
+        // UPDATE isAdmin For specific user
+        [HttpPut("update-is-admin")]
+        public IActionResult UpdateUserIsAdmin([FromQuery] int sender_id, int id)
+        {
+            var user = _usersService.GetUserById(sender_id);
+
+            if (user.isAdmin == false)
+            {
+                return BadRequest("You don't have permission");
+            }
+
+            var userToUpdate = _usersService.GetUserById(id);
+
+            try
+            {
+                if (userToUpdate != null)
+                {
+                    // Reverse isAdmin
+                    userToUpdate.isAdmin = !userToUpdate.isAdmin;
+                    // Submit changes to db
+                    _adminService.SubmitUserChanges();
+
+                    return Ok(userToUpdate);
+                }
+                else
+                {
+                    return NotFound("User Not Found");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+
         }
 
     }

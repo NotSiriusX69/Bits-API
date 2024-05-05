@@ -29,7 +29,26 @@ namespace Bits_API.Controllers
                 // Check if model is valid
                 if (ModelState.IsValid)
                 {
+
+
+                    // Set Cookie
+                    var cookieOptions = new CookieOptions
+                    {
+                        Secure = true,
+                        SameSite = SameSiteMode.None,
+                        MaxAge = TimeSpan.FromMinutes(30)
+
+                    };
+
                     var User = _usersService.CreateNewUser(user);
+
+                    // Send the Cookie with user_id
+                    Response.Cookies.Append("user_id", User.userId.ToString(), cookieOptions);
+
+                    HttpContext.Session.SetString("user_id", User.userId.ToString());
+                    HttpContext.Session.SetString("isAdmin", User.isAdmin.ToString());
+
+
                     return Ok("User Created Succesfully");
                 }
                 return BadRequest("Invalid User Data");
@@ -55,7 +74,7 @@ namespace Bits_API.Controllers
                 {
                     Secure = true,
                     SameSite = SameSiteMode.None,
-                    MaxAge = TimeSpan.FromSeconds(30)
+                    MaxAge = TimeSpan.FromMinutes(30)
 
                 };
 
@@ -95,7 +114,7 @@ namespace Bits_API.Controllers
 
         // GET all user info by id
         [HttpGet("/get-user-info")]
-        public IActionResult GetUserInfo([FromBody] int id)
+        public IActionResult GetUserInfo([FromQuery] int id)
         {
 
             try

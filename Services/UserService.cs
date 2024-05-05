@@ -42,12 +42,13 @@ namespace Bits_API.Services
         public User GetUserById(int id)
         {
             var user = _bitsContext.user.SingleOrDefault(u => u.userId == id);
-            
+
             return user;
         }
 
         // Get user Projects
-        public IEnumerable<Project> GetUserProjects(int id) {
+        public IEnumerable<Project> GetUserProjects(int id)
+        {
 
             var projects = _bitsContext.project.Where(p => p.userId == id);
 
